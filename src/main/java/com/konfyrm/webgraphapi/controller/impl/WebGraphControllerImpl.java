@@ -3,6 +3,7 @@ package com.konfyrm.webgraphapi.controller.impl;
 import com.konfyrm.webgraphapi.controller.WebGraphController;
 import com.konfyrm.webgraphapi.domain.entity.Execution;
 import com.konfyrm.webgraphapi.service.ExecutionService;
+import com.konfyrm.webgraphapi.service.GraphAnalysisService;
 import com.konfyrm.webgraphapi.service.WebGraphService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -16,6 +17,7 @@ public class WebGraphControllerImpl implements WebGraphController {
 
     private final ExecutionService executionService;
     private final WebGraphService webGraphService;
+    private final GraphAnalysisService graphAnalysisService;
 
     @Autowired
     public WebGraphControllerImpl(
