@@ -19,6 +19,7 @@ public class WCCFinder {
         for (int v = 0; v < graph.getN(); v++) {
             if (!visited[v]) {
                 List<Integer> bfsOrder = SearchAlgorithms.bfs(convertedMatrix, graph.getN(), v);
+                bfsOrder.forEach(u -> visited[u] = true);
                 wcc.add(bfsOrder);
             }
         }
@@ -27,3 +28,4 @@ public class WCCFinder {
     }
 
 }
+
