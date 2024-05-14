@@ -9,7 +9,6 @@ import com.konfyrm.webgraphapi.service.WebGraphService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.Optional;
@@ -19,15 +18,17 @@ public class WebGraphControllerImpl implements WebGraphController {
 
     private final ExecutionService executionService;
     private final WebGraphService webGraphService;
-//    private final GraphAnalysisService graphAnalysisService;
+    private final GraphAnalysisService graphAnalysisService;
 
     @Autowired
     public WebGraphControllerImpl(
             @Qualifier("executionServiceImpl") ExecutionService executionService,
-            @Qualifier("webGraphServiceImpl") WebGraphService webGraphService
+            @Qualifier("webGraphServiceImpl") WebGraphService webGraphService,
+            @Qualifier("graphAnalysisServiceImpl") GraphAnalysisService graphAnalysisService
     ) {
         this.executionService = executionService;
         this.webGraphService = webGraphService;
+        this.graphAnalysisService = graphAnalysisService;
     }
 
     @Override
@@ -42,8 +43,19 @@ public class WebGraphControllerImpl implements WebGraphController {
         }
 
         UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
-        return null;
+        return ResponseEntity.ok().build(); // todo: a dto maybe?
+    }
+
+    @Override
+    public ResponseEntity<?> exportGraph(String executionUuid) {
+        webGraphService.exportJson(executionUuid);
+        return ResponseEntity.ok().build();
+    }
+
+    @Override
+    public ResponseEntity<?> importGraph(String executionUuid) {
+        webGraphService.importJson(executionUuid);
+        return ResponseEntity.ok().build();
     }
 
 }
-

@@ -6,6 +6,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 import static com.konfyrm.webgraphapi.domain.KafkaTopicConstants.REQUEST_TOPIC;
 
 @Service
@@ -21,11 +23,10 @@ public class UrlVisitServiceImpl implements UrlVisitService {
     }
 
     @Override
-    public void sendUrlVisitRequest(String executionUuid, String startingUrl, int maxVisitedNodes) {
+    public void sendUrlVisitRequest(String executionUuid, String startingUrl) {
         UrlVisitRequest request = UrlVisitRequest.builder()
                 .executionUuid(executionUuid)
                 .url(startingUrl)
-                .maxVisitedNodes(maxVisitedNodes)
                 .build();
         kafkaTemplate.send(REQUEST_TOPIC, request);
     }

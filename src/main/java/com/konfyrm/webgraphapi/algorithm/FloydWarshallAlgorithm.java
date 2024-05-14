@@ -4,6 +4,10 @@ import com.konfyrm.webgraphapi.domain.model.UrlGraph;
 
 public class FloydWarshallAlgorithm {
 
+    private FloydWarshallAlgorithm() {
+        throw new IllegalStateException("Utils class should not be instantiated.");
+    }
+
     public static int[][] execute(UrlGraph graph) {
         int[][] shortestPaths = new int[graph.getN()][graph.getN()];
         for (int i = 0; i < shortestPaths.length; i++) {
@@ -11,11 +15,9 @@ public class FloydWarshallAlgorithm {
                 shortestPaths[i][j] = Integer.MAX_VALUE;
             }
         }
-        for (int i = 0; i < graph.getN(); i++) {
-            for (int j = 0; j < graph.getN(); j++) {
-                if (graph.getMatrix()[i][j] > 0){
-                    shortestPaths[i][j] = graph.getMatrix()[i][j];
-                }
+        for (int v = 0; v < graph.getN(); v++) {
+            for (Integer u : graph.getNeighbours()[v]) {
+                shortestPaths[v][u] = 1;
             }
         }
         for (int i = 0; i < graph.getN(); i++) {

@@ -8,7 +8,9 @@ import java.util.List;
 
 public class DisconnectingVerticesFinder {
 
-    private DisconnectingVerticesFinder() {}
+    private DisconnectingVerticesFinder() {
+        throw new IllegalStateException("Utils class should not be instantiated.");
+    }
 
     // we assume that we only pass non-directed graphs!!!
     public static List<Integer> findDisconnectingVertices(int[][] graph, int n) {

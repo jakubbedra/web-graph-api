@@ -1,20 +1,19 @@
 package com.konfyrm.webgraphapi.domain.model;
 
-import lombok.Builder;
-import lombok.EqualsAndHashCode;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
+import java.util.List;
 import java.util.Map;
 
 @Getter
 @Setter
 @Builder
 @EqualsAndHashCode
+@NoArgsConstructor
+@AllArgsConstructor
 public class UrlGraph {
     private int n;
     private int m;
-    private int[][] matrix;
+    private List<Integer>[] neighbours;
     private Map<String, Integer> urlsToIndices;
 }
-

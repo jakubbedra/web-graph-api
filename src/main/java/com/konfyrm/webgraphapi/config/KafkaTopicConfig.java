@@ -14,6 +14,7 @@ public class KafkaTopicConfig {
     @Bean
     public NewTopic webGraphRequestTopic() {
         return TopicBuilder.name(REQUEST_TOPIC)
+                .partitions(2)
                 .build();
     }
 
