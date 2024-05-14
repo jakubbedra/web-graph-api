@@ -1,10 +1,19 @@
 package com.konfyrm.webgraphapi.service.impl;
 
+import com.konfyrm.webgraphapi.algorithm.DisconnectingVerticesFinder;
 import com.konfyrm.webgraphapi.algorithm.FloydWarshallAlgorithm;
+import com.konfyrm.webgraphapi.algorithm.SCCFinder;
+import com.konfyrm.webgraphapi.algorithm.WCCFinder;
 import com.konfyrm.webgraphapi.domain.model.UrlGraph;
+import com.konfyrm.webgraphapi.domain.response.ConnectedComponentsResponse;
+import com.konfyrm.webgraphapi.domain.response.DisconnectingVerticesResponse;
 import com.konfyrm.webgraphapi.domain.response.GraphDistancesResponse;
+import com.konfyrm.webgraphapi.domain.response.VertexDegreeDistributionResponse;
 import com.konfyrm.webgraphapi.service.GraphAnalysisService;
+import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
 
 @Service
 public class GraphAnalysisServiceImpl implements GraphAnalysisService {
@@ -43,6 +52,35 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
                 .distances(distances)
                 .avgDistance(avgDistance)
                 .build();
+    }
+
+    @Override
+    public ConnectedComponentsResponse calculateConnectedComponents(UrlGraph urlGraph) {
+        List<List<Integer>> wcccs = WCCFinder.execute(urlGraph);
+        List<List<Integer>> sccs = SCCFinder.execute(urlGraph);
+        return ConnectedComponentsResponse.builder()
+                .stronglyConnectedComponents(sccs)
+                .weaklyConnectedComponents(wcccs)
+                .sccCount(sccs.size())
+                .wccCount(wcccs.size())
+                .build();
+    }
+
+    @Override
+    public DisconnectingVerticesResponse findDisconnectingVertices(UrlGraph urlGraph) {
+        List<Integer> disconnectingVertices = DisconnectingVerticesFinder
+                .findDisconnectingVertices(urlGraph.getNeighbours(), urlGraph.getN());
+        List<Pair<Integer, Integer>> disconnectingVerticesPairs = DisconnectingVerticesFinder
+                .findDisconnectingVerticesPairs(urlGraph.getNeighbours(), urlGraph.getN());
+        return DisconnectingVerticesResponse.builder()
+                .disconnectingVertices(disconnectingVertices)
+                .disconnectingVerticesPairs(disconnectingVerticesPairs)
+                .build();
+    }
+
+    @Override
+    public VertexDegreeDistributionResponse calculateVertexDegreeDistribution(UrlGraph urlGraph) {
+        return null;
     }
 
 }

@@ -3,6 +3,10 @@ package com.konfyrm.webgraphapi.controller.impl;
 import com.konfyrm.webgraphapi.controller.WebGraphController;
 import com.konfyrm.webgraphapi.domain.entity.Execution;
 import com.konfyrm.webgraphapi.domain.model.UrlGraph;
+import com.konfyrm.webgraphapi.domain.response.ConnectedComponentsResponse;
+import com.konfyrm.webgraphapi.domain.response.DisconnectingVerticesResponse;
+import com.konfyrm.webgraphapi.domain.response.GraphDistancesResponse;
+import com.konfyrm.webgraphapi.domain.response.VertexDegreeDistributionResponse;
 import com.konfyrm.webgraphapi.service.ExecutionService;
 import com.konfyrm.webgraphapi.service.GraphAnalysisService;
 import com.konfyrm.webgraphapi.service.WebGraphService;
@@ -44,6 +48,51 @@ public class WebGraphControllerImpl implements WebGraphController {
 
         UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
         return ResponseEntity.ok().build(); // todo: a dto maybe?
+    }
+
+    @Override
+    public ResponseEntity<?> getDistances(String executionUuid) {
+        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
+        if (executionOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        // todo: check if execution finished
+        UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
+        GraphDistancesResponse graphDistancesResponse = graphAnalysisService.calculateDistances(graph);
+        return ResponseEntity.ok(graphDistancesResponse);
+    }
+
+    @Override
+    public ResponseEntity<?> getConnectedComponents(String executionUuid) {
+        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
+        if (executionOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
+        ConnectedComponentsResponse response = graphAnalysisService.calculateConnectedComponents(graph);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<?> getDisconnectingVertices(String executionUuid) {
+        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
+        if (executionOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
+        DisconnectingVerticesResponse response = graphAnalysisService.findDisconnectingVertices(graph);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<?> getVertexDegreeDistribution(String executionUuid) {
+        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
+        if (executionOptional.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+        UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
+        VertexDegreeDistributionResponse response = graphAnalysisService.calculateVertexDegreeDistribution(graph);
+        return ResponseEntity.ok(response);
     }
 
     @Override

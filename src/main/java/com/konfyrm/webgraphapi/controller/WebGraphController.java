@@ -12,6 +12,17 @@ public interface WebGraphController {
     @GetMapping("/{executionUuid}")
     ResponseEntity<?> getGraph(@PathVariable("executionUuid") String executionUuid);
 
+    @GetMapping("/{executionUuid}/distances")
+    ResponseEntity<?> getDistances(@PathVariable("executionUuid") String executionUuid);
+
+    @GetMapping("/{executionUuid}/components")
+    ResponseEntity<?> getConnectedComponents(@PathVariable("executionUuid") String executionUuid);
+
+    @GetMapping("/{executionUuid}/disconnecting-vertices")
+    ResponseEntity<?> getDisconnectingVertices(@PathVariable("executionUuid") String executionUuid);
+
+    @GetMapping("/{executionUuid}/distribution")
+    ResponseEntity<?> getVertexDegreeDistribution(@PathVariable("executionUuid") String executionUuid);
     // exports and import from json file
 
     @PostMapping("/{executionUuid}/export")

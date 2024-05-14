@@ -13,13 +13,13 @@ public class DisconnectingVerticesFinder {
     }
 
     // we assume that we only pass non-directed graphs!!!
-    public static List<Integer> findDisconnectingVertices(int[][] graph, int n) {
+    public static List<Integer> findDisconnectingVertices(List<Integer>[] graph, int n) {
         boolean[] visited = new boolean[n];
         List<Integer> disconnectingVertices = new LinkedList<>();
         for (int v = 0; v < n; v++) {
             Arrays.fill(visited,false);
             visited[v] = true;// the vertex does not exist :)
-            List<Integer> bfsOrder = SearchAlgorithms.bfs(graph, n, (v + 1) % n, visited);
+            List<Integer> bfsOrder = SearchAlgorithms.bfs(graph, (v + 1) % n, visited);
             if (bfsOrder.size() != n - 1) {
                 disconnectingVertices.add(v);
             }
@@ -27,7 +27,7 @@ public class DisconnectingVerticesFinder {
         return disconnectingVertices;
     }
 
-    public static List<Pair<Integer, Integer>> findDisconnectingVerticesPairs(int[][] graph, int n) {
+    public static List<Pair<Integer, Integer>> findDisconnectingVerticesPairs(List<Integer>[] graph, int n) {
         boolean[] visited = new boolean[n];
         List<Pair<Integer, Integer>> disconnectingVertices = new LinkedList<>();
         for (int v = 0; v < n; v++) {
@@ -36,7 +36,7 @@ public class DisconnectingVerticesFinder {
                 visited[v] = true;// the vertex does not exist :)
                 visited[u] = true;// the vertex does not exist :)
                 int startVertex = lowestNumber(u, v, n);
-                List<Integer> bfsOrder = SearchAlgorithms.bfs(graph, n, startVertex, visited);
+                List<Integer> bfsOrder = SearchAlgorithms.bfs(graph, startVertex, visited);
                 if (bfsOrder.size() != n - 2) {
                     disconnectingVertices.add(Pair.of(u, v));
                 }
