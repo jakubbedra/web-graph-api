@@ -9,7 +9,7 @@ import lombok.*;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class GraphDistancesResponse {
-    private int[] radius;
+    private int radius;
     private int diameter;
     private int[][] distances;
     private double avgDistance;

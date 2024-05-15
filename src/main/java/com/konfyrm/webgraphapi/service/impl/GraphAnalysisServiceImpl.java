@@ -1,9 +1,6 @@
 package com.konfyrm.webgraphapi.service.impl;
 
-import com.konfyrm.webgraphapi.algorithm.DisconnectingVerticesFinder;
-import com.konfyrm.webgraphapi.algorithm.FloydWarshallAlgorithm;
-import com.konfyrm.webgraphapi.algorithm.SCCFinder;
-import com.konfyrm.webgraphapi.algorithm.WCCFinder;
+import com.konfyrm.webgraphapi.algorithm.*;
 import com.konfyrm.webgraphapi.domain.model.UrlGraph;
 import com.konfyrm.webgraphapi.domain.response.ConnectedComponentsResponse;
 import com.konfyrm.webgraphapi.domain.response.DisconnectingVerticesResponse;
@@ -14,6 +11,7 @@ import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class GraphAnalysisServiceImpl implements GraphAnalysisService {
@@ -21,7 +19,7 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
     @Override
     public GraphDistancesResponse calculateDistances(UrlGraph urlGraph) {
         int[][] distances = FloydWarshallAlgorithm.execute(urlGraph);
-        int[] radius = new int[urlGraph.getN()];
+        int[] eccentricity = new int[urlGraph.getN()];
         for (int i = 0; i < urlGraph.getN(); i++) {
             int maxDistance = distances[i][0];
             for (int j = 1; j < urlGraph.getN(); j++) {
@@ -29,13 +27,19 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
                     maxDistance = distances[i][j];
                 }
             }
-            radius[i] = maxDistance;
+            eccentricity[i] = maxDistance;
         }
 
-        int diameter = radius[0];
+        int diameter = eccentricity[0];
         for (int i = 0; i < urlGraph.getN(); i++) {
-            if(diameter < radius[i]) {
-                diameter = radius[i];
+            if (diameter < eccentricity[i]) {
+                diameter = eccentricity[i];
+            }
+        }
+        int radius = eccentricity[0];
+        for (int i = 0; i < urlGraph.getN(); i++) {
+            if (radius > eccentricity[i]) {
+                radius = eccentricity[i];
             }
         }
         double avgDistance = 0.0;
@@ -80,7 +84,15 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
 
     @Override
     public VertexDegreeDistributionResponse calculateVertexDegreeDistribution(UrlGraph urlGraph) {
-        return null;
+        Map<Integer, Integer> inDegrees = VertexDegreeDistribution
+                .calculateInDegreeDistribution(urlGraph.getNeighbours(), urlGraph.getN());
+        Map<Integer, Integer> outDegrees = VertexDegreeDistribution
+                .calculateOutDegreeDistribution(urlGraph.getNeighbours(), urlGraph.getN());
+        // todo: power function coefficient
+        return VertexDegreeDistributionResponse.builder()
+                .inDegreeDistribution(inDegrees)
+                .outDegreeDistribution(outDegrees)
+                .build();
     }
 
 }
