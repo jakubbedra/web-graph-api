@@ -13,5 +13,8 @@ import java.util.Map;
 public class VertexDegreeDistributionResponse {
     private Map<Integer, Integer> inDegreeDistribution;
     private Map<Integer, Integer> outDegreeDistribution;
-    // todo: power function elements
+    private double aIn;
+    private double bIn;
+    private double aOut;
+    private double bOut;
 }

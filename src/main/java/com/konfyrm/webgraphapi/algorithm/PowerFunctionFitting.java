@@ -13,18 +13,39 @@ public class PowerFunctionFitting {
         throw new IllegalStateException("Utils class should not be instantiated.");
     }
 
-    public static Pair<Double, Double> fitPowerFunction(double[] xValues, double[] yValues, Map<Integer, Integer> samples) {
-        // Transform data to logarithmic space
-        List<Double> logXValues = DoubleStream.of(xValues).map(Math::log).boxed().collect(Collectors.toList());
-        List<Double> logYValues = DoubleStream.of(yValues).map(Math::log).boxed().collect(Collectors.toList());
+    // ax^b
+    public static Pair<Double, Double> fitPowerFunction(Map<Integer, Integer> samples) {
 
-        // Calculate means of logarithmic values
-        double meanLogX = logXValues.stream().mapToDouble(Double::doubleValue).average().orElse(0);
-        double meanLogY = logYValues.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+
+        // TODO: handle 0 values in x (simple filter will not help, because its corresponding y value needs to be handled aswell),
+        // might consider moving the chart right
+
+        // todo: also, I smell some bullshit in distances radius, maybe we should take an underlying graph?
+        // todo: or check how to calculate it for digraphs dunno
+
+        // todo: in and out components + page rank remain
+
+
+        // TODO: CLUSTERING COEFFICIENTS!!!!!!!!!!!!!!!!!!!!!!!!!!!! (with underlying graph)
+
+
+        List<Double> logXValues = samples.keySet().stream()
+                .mapToDouble(x -> (double)x)
+                .map(Math::log)
+                .boxed()
+                .collect(Collectors.toList());
+        List<Double> logYValues = samples.values().stream()
+                .mapToDouble(x -> (double)x)
+                .map(Math::log)
+                .boxed()
+                .collect(Collectors.toList());
+
+        double avgLogX = logXValues.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+        double avgLogY = logYValues.stream().mapToDouble(Double::doubleValue).average().orElse(0);
 
         // Calculate coefficients
-        double b = calculateB(logXValues, logYValues, meanLogX, meanLogY);
-        double a = calculateA(meanLogX, meanLogY, b);
+        double b = calculateB(logXValues, logYValues, avgLogX, avgLogY);
+        double a = calculateA(avgLogX, avgLogY, b);
 
         return Pair.of(a, b);
     }
@@ -32,10 +53,13 @@ public class PowerFunctionFitting {
     private static double calculateB(List<Double> logXValues, List<Double> logYValues, double meanLogX, double meanLogY) {
         double numerator = 0;
         double denominator = 0;
-        for (int i = 0; i < logXValues.size(); i++) {
-            numerator += (logXValues.get(i) - meanLogX) * (logYValues.get(i) - meanLogY);
-            denominator += Math.pow(logXValues.get(i) - meanLogX, 2);
+        int n = logXValues.size();
+        for (int i = 0; i < n; i++) {
+            numerator += logXValues.get(i) * logYValues.get(i);
+            denominator += Math.pow(logXValues.get(i), 2);
         }
+        numerator -=  n * meanLogX * meanLogY;
+        denominator -= n * meanLogX * meanLogX;
         return numerator / denominator;
     }
 

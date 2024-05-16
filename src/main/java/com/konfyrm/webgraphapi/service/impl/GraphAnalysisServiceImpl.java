@@ -10,6 +10,7 @@ import com.konfyrm.webgraphapi.service.GraphAnalysisService;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -21,35 +22,38 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
         int[][] distances = FloydWarshallAlgorithm.execute(urlGraph);
         int[] eccentricity = new int[urlGraph.getN()];
         for (int i = 0; i < urlGraph.getN(); i++) {
-            int maxDistance = distances[i][0];
-            for (int j = 1; j < urlGraph.getN(); j++) {
-                if (maxDistance < distances[i][j]) {
+            int maxDistance = 0;
+            for (int j = 0; j < urlGraph.getN(); j++) {
+                if (distances[i][j] != Integer.MAX_VALUE && i != j && maxDistance < distances[i][j]) {
                     maxDistance = distances[i][j];
                 }
             }
             eccentricity[i] = maxDistance;
         }
 
-        int diameter = eccentricity[0];
+        int diameter = 0;
         for (int i = 0; i < urlGraph.getN(); i++) {
             if (diameter < eccentricity[i]) {
                 diameter = eccentricity[i];
             }
         }
-        int radius = eccentricity[0];
+        int radius = 0;
         for (int i = 0; i < urlGraph.getN(); i++) {
             if (radius > eccentricity[i]) {
                 radius = eccentricity[i];
             }
         }
         double avgDistance = 0.0;
+        int distancesCount = 0;
         for (int u = 0; u < urlGraph.getN(); u++) {
-            for (int v = 0; v <urlGraph.getN(); v++) {
-                if (distances[u][v] != Integer.MAX_VALUE) {
+            for (int v = 0; v < urlGraph.getN(); v++) {
+                if (u != v && distances[u][v] != Integer.MAX_VALUE) {
                     avgDistance += distances[u][v];
+                    distancesCount++;
                 }
             }
         }
+        avgDistance /= distancesCount;
         return GraphDistancesResponse.builder()
                 .diameter(diameter)
                 .radius(radius)
@@ -74,7 +78,8 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
     public DisconnectingVerticesResponse findDisconnectingVertices(UrlGraph urlGraph) {
         List<Integer> disconnectingVertices = DisconnectingVerticesFinder
                 .findDisconnectingVertices(urlGraph.getNeighbours(), urlGraph.getN());
-        List<Pair<Integer, Integer>> disconnectingVerticesPairs = DisconnectingVerticesFinder
+        List<Pair<Integer, Integer>> disconnectingVerticesPairs = !disconnectingVertices.isEmpty() ?
+                Collections.emptyList() : DisconnectingVerticesFinder
                 .findDisconnectingVerticesPairs(urlGraph.getNeighbours(), urlGraph.getN());
         return DisconnectingVerticesResponse.builder()
                 .disconnectingVertices(disconnectingVertices)
@@ -89,9 +94,15 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
         Map<Integer, Integer> outDegrees = VertexDegreeDistribution
                 .calculateOutDegreeDistribution(urlGraph.getNeighbours(), urlGraph.getN());
         // todo: power function coefficient
+        Pair<Double, Double> inCoefficients = PowerFunctionFitting.fitPowerFunction(inDegrees);
+        Pair<Double, Double> outCoefficients = PowerFunctionFitting.fitPowerFunction(outDegrees);
         return VertexDegreeDistributionResponse.builder()
                 .inDegreeDistribution(inDegrees)
                 .outDegreeDistribution(outDegrees)
+                .aIn(inCoefficients.getFirst())
+                .bIn(inCoefficients.getSecond())
+                .aOut(outCoefficients.getFirst())
+                .bOut(outCoefficients.getSecond())
                 .build();
     }
 

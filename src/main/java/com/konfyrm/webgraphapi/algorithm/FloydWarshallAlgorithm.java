@@ -26,7 +26,8 @@ public class FloydWarshallAlgorithm {
         for (int k = 0; k < graph.getN(); k++) {
             for (int i = 0; i < graph.getN(); i++) {
                 for (int j = 0; j < graph.getN(); j++) {
-                    if (shortestPaths[i][j] > shortestPaths[i][k] + shortestPaths[k][j]) {
+                    if (shortestPaths[i][k] != Integer.MAX_VALUE && shortestPaths[k][j] != Integer.MAX_VALUE &&
+                            shortestPaths[i][j] > shortestPaths[i][k] + shortestPaths[k][j]) {
                         shortestPaths[i][j] = shortestPaths[i][k] + shortestPaths[k][j];
                     }
                 }

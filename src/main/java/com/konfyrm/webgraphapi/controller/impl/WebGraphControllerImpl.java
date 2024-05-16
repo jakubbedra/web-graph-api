@@ -52,10 +52,10 @@ public class WebGraphControllerImpl implements WebGraphController {
 
     @Override
     public ResponseEntity<?> getDistances(String executionUuid) {
-        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
-        if (executionOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+//        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
+//        if (executionOptional.isEmpty()) {
+//            return ResponseEntity.notFound().build();
+//        }
         // todo: check if execution finished
         UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
         GraphDistancesResponse graphDistancesResponse = graphAnalysisService.calculateDistances(graph);
@@ -64,10 +64,10 @@ public class WebGraphControllerImpl implements WebGraphController {
 
     @Override
     public ResponseEntity<?> getConnectedComponents(String executionUuid) {
-        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
-        if (executionOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+//        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
+//        if (executionOptional.isEmpty()) {
+//            return ResponseEntity.notFound().build();
+//        }
         UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
         ConnectedComponentsResponse response = graphAnalysisService.calculateConnectedComponents(graph);
         return ResponseEntity.ok(response);
@@ -75,10 +75,10 @@ public class WebGraphControllerImpl implements WebGraphController {
 
     @Override
     public ResponseEntity<?> getDisconnectingVertices(String executionUuid) {
-        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
-        if (executionOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+//        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
+//        if (executionOptional.isEmpty()) {
+//            return ResponseEntity.notFound().build();
+//        }
         UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
         DisconnectingVerticesResponse response = graphAnalysisService.findDisconnectingVertices(graph);
         return ResponseEntity.ok(response);
@@ -86,10 +86,10 @@ public class WebGraphControllerImpl implements WebGraphController {
 
     @Override
     public ResponseEntity<?> getVertexDegreeDistribution(String executionUuid) {
-        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
-        if (executionOptional.isEmpty()) {
-            return ResponseEntity.notFound().build();
-        }
+//        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
+//        if (executionOptional.isEmpty()) {
+//            return ResponseEntity.notFound().build();
+//        }
         UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
         VertexDegreeDistributionResponse response = graphAnalysisService.calculateVertexDegreeDistribution(graph);
         return ResponseEntity.ok(response);

@@ -23,6 +23,13 @@ public interface WebGraphController {
 
     @GetMapping("/{executionUuid}/distribution")
     ResponseEntity<?> getVertexDegreeDistribution(@PathVariable("executionUuid") String executionUuid);
+
+    @GetMapping("/{executionUuid}/clustering-coefficients")
+    ResponseEntity<?> getClusteringCoefficients(@PathVariable("executionUuid") String executionUuid);
+
+    @GetMapping("/{executionUuid}/page-rank")
+    ResponseEntity<?> getPageRank(@PathVariable("executionUuid") String executionUuid);
+
     // exports and import from json file
 
     @PostMapping("/{executionUuid}/export")
