@@ -16,7 +16,7 @@ public class WCCFinder {
         List<List<Integer>> wcc = new LinkedList<>();
         List<Integer>[] neighbours = graph.getNeighbours();
 
-        List<Integer>[] convertedMatrix = DigraphToGraphConverter.convert(neighbours, graph.getN());
+        List<Integer>[] convertedMatrix = GraphConverter.digraphToGraph(neighbours, graph.getN());
 
         boolean[] visited = new boolean[graph.getN()];
         Arrays.fill(visited, false);

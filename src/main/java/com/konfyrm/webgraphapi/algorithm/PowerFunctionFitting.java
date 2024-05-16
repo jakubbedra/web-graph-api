@@ -15,19 +15,6 @@ public class PowerFunctionFitting {
 
     // ax^b
     public static Pair<Double, Double> fitPowerFunction(Map<Integer, Integer> samples) {
-
-
-        // TODO: handle 0 values in x (simple filter will not help, because its corresponding y value needs to be handled aswell),
-        // might consider moving the chart right
-
-        // todo: also, I smell some bullshit in distances radius, maybe we should take an underlying graph?
-        // todo: or check how to calculate it for digraphs dunno
-
-        // todo: in and out components + page rank remain
-
-
-        // TODO: CLUSTERING COEFFICIENTS!!!!!!!!!!!!!!!!!!!!!!!!!!!! (with underlying graph)
-
         List<Double> logXValues = samples.keySet().stream()
                 .mapToDouble(x -> x == 0 ? 0.00001 : (double)x)
                 .map(Math::log)
@@ -67,3 +54,4 @@ public class PowerFunctionFitting {
     }
 
 }
+

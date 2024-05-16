@@ -2,10 +2,7 @@ package com.konfyrm.webgraphapi.service.impl;
 
 import com.konfyrm.webgraphapi.algorithm.*;
 import com.konfyrm.webgraphapi.domain.model.UrlGraph;
-import com.konfyrm.webgraphapi.domain.response.ConnectedComponentsResponse;
-import com.konfyrm.webgraphapi.domain.response.DisconnectingVerticesResponse;
-import com.konfyrm.webgraphapi.domain.response.GraphDistancesResponse;
-import com.konfyrm.webgraphapi.domain.response.VertexDegreeDistributionResponse;
+import com.konfyrm.webgraphapi.domain.response.*;
 import com.konfyrm.webgraphapi.service.GraphAnalysisService;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
@@ -82,6 +79,8 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
                 Collections.emptyList() : DisconnectingVerticesFinder
                 .findDisconnectingVerticesPairs(urlGraph.getNeighbours(), urlGraph.getN());
         return DisconnectingVerticesResponse.builder()
+                .disconnectingVerticesCount(disconnectingVertices.size())
+                .disconnectingVerticesPairsCount(disconnectingVerticesPairs.size())
                 .disconnectingVertices(disconnectingVertices)
                 .disconnectingVerticesPairs(disconnectingVerticesPairs)
                 .build();
@@ -93,7 +92,6 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
                 .calculateInDegreeDistribution(urlGraph.getNeighbours(), urlGraph.getN());
         Map<Integer, Integer> outDegrees = VertexDegreeDistribution
                 .calculateOutDegreeDistribution(urlGraph.getNeighbours(), urlGraph.getN());
-        // todo: power function coefficient
         Pair<Double, Double> inCoefficients = PowerFunctionFitting.fitPowerFunction(inDegrees);
         Pair<Double, Double> outCoefficients = PowerFunctionFitting.fitPowerFunction(outDegrees);
         return VertexDegreeDistributionResponse.builder()
@@ -106,5 +104,32 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
                 .build();
     }
 
-}
+    @Override
+    public ClusteringCoefficientsResponse calculateClusteringCoefficients(UrlGraph urlGraph) {
+        int n = urlGraph.getN();
+        int[][] graph = GraphConverter.digraphToAdjacencyMatrixGraph(urlGraph.getNeighbours(), n);
+        double globalCoefficient = ClusteringCoefficientCalculator.computeGlobal(graph, n);
+        double[] localCoefficients = new double[n];
 
+        for (int v = 0; v < n; v++) {
+            localCoefficients[v] = ClusteringCoefficientCalculator.computeLocal(graph, n, v);
+        }
+
+        return ClusteringCoefficientsResponse.builder()
+                .global(globalCoefficient)
+                .local(localCoefficients)
+                .build();
+    }
+
+    @Override
+    public PageRankResponse calculatePageRank(UrlGraph urlGraph, double dampingFactor) {
+        int n = urlGraph.getN();
+        Double[] pageRank = PageRank.execute(urlGraph.getNeighbours(), n, dampingFactor);
+        Map<Double, Integer> distribution = AlgorithmUtils.valuesToDistribution(pageRank, n);
+        return PageRankResponse.builder()
+                .pageRank(pageRank)
+                .distribution(distribution)
+                .build();
+    }
+
+}

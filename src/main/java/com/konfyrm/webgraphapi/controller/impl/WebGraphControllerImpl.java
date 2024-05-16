@@ -3,10 +3,8 @@ package com.konfyrm.webgraphapi.controller.impl;
 import com.konfyrm.webgraphapi.controller.WebGraphController;
 import com.konfyrm.webgraphapi.domain.entity.Execution;
 import com.konfyrm.webgraphapi.domain.model.UrlGraph;
-import com.konfyrm.webgraphapi.domain.response.ConnectedComponentsResponse;
-import com.konfyrm.webgraphapi.domain.response.DisconnectingVerticesResponse;
-import com.konfyrm.webgraphapi.domain.response.GraphDistancesResponse;
-import com.konfyrm.webgraphapi.domain.response.VertexDegreeDistributionResponse;
+import com.konfyrm.webgraphapi.domain.request.PageRankRequest;
+import com.konfyrm.webgraphapi.domain.response.*;
 import com.konfyrm.webgraphapi.service.ExecutionService;
 import com.konfyrm.webgraphapi.service.GraphAnalysisService;
 import com.konfyrm.webgraphapi.service.WebGraphService;
@@ -51,7 +49,7 @@ public class WebGraphControllerImpl implements WebGraphController {
     }
 
     @Override
-    public ResponseEntity<?> getDistances(String executionUuid) {
+    public ResponseEntity<?> calculateDistances(String executionUuid) {
 //        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
 //        if (executionOptional.isEmpty()) {
 //            return ResponseEntity.notFound().build();
@@ -63,7 +61,7 @@ public class WebGraphControllerImpl implements WebGraphController {
     }
 
     @Override
-    public ResponseEntity<?> getConnectedComponents(String executionUuid) {
+    public ResponseEntity<?> findConnectedComponents(String executionUuid) {
 //        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
 //        if (executionOptional.isEmpty()) {
 //            return ResponseEntity.notFound().build();
@@ -74,7 +72,7 @@ public class WebGraphControllerImpl implements WebGraphController {
     }
 
     @Override
-    public ResponseEntity<?> getDisconnectingVertices(String executionUuid) {
+    public ResponseEntity<?> findDisconnectingVertices(String executionUuid) {
 //        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
 //        if (executionOptional.isEmpty()) {
 //            return ResponseEntity.notFound().build();
@@ -85,13 +83,27 @@ public class WebGraphControllerImpl implements WebGraphController {
     }
 
     @Override
-    public ResponseEntity<?> getVertexDegreeDistribution(String executionUuid) {
+    public ResponseEntity<?> calculateVertexDegreeDistribution(String executionUuid) {
 //        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
 //        if (executionOptional.isEmpty()) {
 //            return ResponseEntity.notFound().build();
 //        }
         UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
         VertexDegreeDistributionResponse response = graphAnalysisService.calculateVertexDegreeDistribution(graph);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<?> calculateClusteringCoefficients(String executionUuid) {
+        UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
+        ClusteringCoefficientsResponse response = graphAnalysisService.calculateClusteringCoefficients(graph);
+        return ResponseEntity.ok(response);
+    }
+
+    @Override
+    public ResponseEntity<?> calculatePageRank(String executionUuid, PageRankRequest request) {
+        UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
+        PageRankResponse response = graphAnalysisService.calculatePageRank(graph, request.getDampingFactor());
         return ResponseEntity.ok(response);
     }
 
@@ -108,3 +120,4 @@ public class WebGraphControllerImpl implements WebGraphController {
     }
 
 }
+

@@ -18,9 +18,11 @@ public class ClusteringCoefficientCalculator {
         }
         int connectedNeighbours = 0;
         for (int u = 0; u < n; u++) {
-            for (int w = u + 1; w < n; w++) {
-                if (graph[u][w] == 1) {
-                    connectedNeighbours++;
+            if (graph[v][u] == 1) {
+                for (int w = u + 1; w < n; w++) {
+                    if (graph[v][w] == 1 && graph[u][w] == 1) {
+                        connectedNeighbours++;
+                    }
                 }
             }
         }

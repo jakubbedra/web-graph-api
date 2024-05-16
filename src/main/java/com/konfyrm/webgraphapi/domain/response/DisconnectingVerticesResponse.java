@@ -12,6 +12,8 @@ import java.util.List;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class DisconnectingVerticesResponse {
+    private int disconnectingVerticesCount;
+    private int disconnectingVerticesPairsCount;
     private List<Integer> disconnectingVertices;
     private List<Pair<Integer, Integer>> disconnectingVerticesPairs;
 }
