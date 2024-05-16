@@ -28,9 +28,8 @@ public class PowerFunctionFitting {
 
         // TODO: CLUSTERING COEFFICIENTS!!!!!!!!!!!!!!!!!!!!!!!!!!!! (with underlying graph)
 
-
         List<Double> logXValues = samples.keySet().stream()
-                .mapToDouble(x -> (double)x)
+                .mapToDouble(x -> x == 0 ? 0.00001 : (double)x)
                 .map(Math::log)
                 .boxed()
                 .collect(Collectors.toList());
