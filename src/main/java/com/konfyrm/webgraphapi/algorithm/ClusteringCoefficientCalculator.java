@@ -30,10 +30,45 @@ public class ClusteringCoefficientCalculator {
     }
 
     public static double computeGlobal(int[][] graph, int n) {
-        int[][] paths = multiply(graph, graph, n);
-        int triangleCount = calculateTriangleCount(graph, paths, n);
-        int tripletsCount = allTripletsCount(paths, n, triangleCount);
-        return (3.0 * (double) triangleCount) / ((double) tripletsCount);
+//        int[][] paths = multiply(graph, graph, n);
+//        int triangleCount = calculateTriangleCount(graph, paths, n);
+//        int tripletsCount = triangleCount + openTripletsCount(graph, paths, n, triangleCount);
+//        return (3.0 * (double) triangleCount) / ((double) tripletsCount);
+        int tripleTriangleCount = 0;
+        int tripletCount = 0;
+
+        // Iterate over all possible triplets
+        for (int i = 0; i < n; i++) {
+            for (int j = i + 1; j < n; j++) {
+                for (int k = j + 1; k < n; k++) {
+                    // Check if nodes i, j, k form a triplet
+                    if (graph[i][j] == 1 && graph[j][k] == 1) {
+                        tripletCount++;
+                        if (graph[i][k] == 1) {
+                            tripleTriangleCount++;
+                        }
+                    }
+                    if (graph[i][k] == 1 && graph[k][j] == 1) {
+                        tripletCount++;
+                        if (graph[i][j] == 1) {
+                            tripleTriangleCount++;
+                        }
+                    }
+                    if (graph[j][i] == 1 && graph[i][k] == 1) {
+                        tripletCount++;
+                        if (graph[j][k] == 1) {
+                            tripleTriangleCount++;
+                        }
+                    }
+                }
+            }
+        }
+
+        // Calculate the global clustering coefficient
+        if (tripletCount == 0) {
+            return 0.0;
+        }
+        return (double) tripleTriangleCount / tripletCount;
     }
 
     private static int[][] multiply(int[][] matrixA, int[][] matrixB, int n) {
@@ -63,14 +98,23 @@ public class ClusteringCoefficientCalculator {
         return count / 3;
     }
 
-    private static int allTripletsCount(int[][] paths, int n, int trianglesCount) {
+    private static int openTripletsCount(int[][] graph, int[][] paths, int n, int trianglesCount) {
+//        int sum = 0;//2x open triplets + 6x triangles
+//        for (int v = 0; v < n; v++) {
+//            for (int u = 0; u < n; u++) {
+//                sum += paths[u][v];
+//            }
+//        }
+//        return (sum - 4 * trianglesCount) / 2;
         int sum = 0;
         for (int v = 0; v < n; v++) {
             for (int u = 0; u < n; u++) {
-                sum += paths[u][v];
+                if (graph[u][v] == 0) {
+                    sum += paths[u][v];
+                }
             }
         }
-        return (sum - 4 * trianglesCount) / 2;
+        return sum;
     }
 
 }
