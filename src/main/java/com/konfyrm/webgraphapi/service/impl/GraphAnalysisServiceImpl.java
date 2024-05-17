@@ -63,21 +63,26 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
     public ConnectedComponentsResponse calculateConnectedComponents(UrlGraph urlGraph) {
         List<List<Integer>> wcccs = WCCFinder.execute(urlGraph);
         List<List<Integer>> sccs = SCCFinder.execute(urlGraph);
+        Map<Integer, List<Integer>> inComponents = InAndOutComponentFinder.findInComponents(urlGraph.getNeighbours(), urlGraph.getN(), sccs);
+        Map<Integer, List<Integer>> outComponents = InAndOutComponentFinder.findOutComponents(urlGraph.getNeighbours(), urlGraph.getN(), sccs);
         return ConnectedComponentsResponse.builder()
                 .stronglyConnectedComponents(sccs)
                 .weaklyConnectedComponents(wcccs)
                 .sccCount(sccs.size())
                 .wccCount(wcccs.size())
+                .inComponents(inComponents)
+                .outComponents(outComponents)
                 .build();
     }
 
     @Override
     public DisconnectingVerticesResponse findDisconnectingVertices(UrlGraph urlGraph) {
+        List<Integer>[] graph = GraphConverter.digraphToGraph(urlGraph.getNeighbours(), urlGraph.getN());
         List<Integer> disconnectingVertices = DisconnectingVerticesFinder
-                .findDisconnectingVertices(urlGraph.getNeighbours(), urlGraph.getN());
+                .findDisconnectingVertices(graph, urlGraph.getN());
         List<Pair<Integer, Integer>> disconnectingVerticesPairs = !disconnectingVertices.isEmpty() ?
                 Collections.emptyList() : DisconnectingVerticesFinder
-                .findDisconnectingVerticesPairs(urlGraph.getNeighbours(), urlGraph.getN());
+                .findDisconnectingVerticesPairs(graph, urlGraph.getN());
         return DisconnectingVerticesResponse.builder()
                 .disconnectingVerticesCount(disconnectingVertices.size())
                 .disconnectingVerticesPairsCount(disconnectingVerticesPairs.size())

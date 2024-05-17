@@ -10,21 +10,6 @@ public class SCCFinder {
         throw new IllegalStateException("Utils class should not be instantiated.");
     }
 
-    private static List<Integer>[] transpose(List<Integer>[] graph, int n) {
-        List<Integer>[] transposedGraph = new List[n];
-        for (int i = 0; i < n; i++) {
-            transposedGraph[i] = new LinkedList<>();
-        }
-
-        for (int v = 0; v < n; v++) {
-            for (int u : graph[v]) {
-                transposedGraph[u].add(v);
-            }
-        }
-
-        return transposedGraph;
-    }
-
     private static void fillOrder(List<Integer>[] graph, int startVertex, boolean visited[], Stack<Integer> stack) {
         Stack<Integer> stackU = new Stack<>();
         stackU.push(startVertex);
@@ -62,7 +47,7 @@ public class SCCFinder {
             }
         }
 
-        List<Integer>[] transpose = transpose(graph, n);
+        List<Integer>[] transpose = GraphConverter.reverseDigraph(graph, n);
 
         Arrays.fill(visited, false);
 
