@@ -10,29 +10,6 @@ public class SCCFinder {
         throw new IllegalStateException("Utils class should not be instantiated.");
     }
 
-    private static List<Integer> dfs(List<Integer>[] graph, int n, int startVertex, boolean[] visited) {
-        List<Integer> order = new ArrayList<>(n);
-        Stack<Integer> stack = new Stack<>();
-        stack.push(startVertex);
-
-        while (!stack.isEmpty()) {
-            int v = stack.pop();
-
-            if (!visited[v]) {
-                order.add(v);
-                visited[v] = true;
-
-                for (int u: graph[v]) {
-                    if (!visited[u]) {
-                        stack.push(u);
-                    }
-                }
-            }
-        }
-
-        return order;
-    }
-
     private static List<Integer>[] transpose(List<Integer>[] graph, int n) {
         List<Integer>[] transposedGraph = new List[n];
         for (int i = 0; i < n; i++) {
@@ -93,7 +70,7 @@ public class SCCFinder {
             int v = stack.pop();
 
             if (!visited[v]) {
-                List<Integer> dfsOrder = dfs(transpose, n, v, visited);
+                List<Integer> dfsOrder = SearchAlgorithms.dfs(transpose, n, v, visited);
                 scc.add(dfsOrder);
             }
         }

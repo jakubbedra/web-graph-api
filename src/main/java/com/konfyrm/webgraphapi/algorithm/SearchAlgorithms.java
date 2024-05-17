@@ -1,13 +1,34 @@
 package com.konfyrm.webgraphapi.algorithm;
 
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Queue;
+import java.util.*;
 
 public class SearchAlgorithms {
 
     private SearchAlgorithms() {
         throw new IllegalStateException("Utils class should not be instantiated.");
+    }
+
+    public static List<Integer> dfs(List<Integer>[] graph, int n, int startVertex, boolean[] visited) {
+        List<Integer> order = new ArrayList<>(n);
+        Stack<Integer> stack = new Stack<>();
+        stack.push(startVertex);
+
+        while (!stack.isEmpty()) {
+            int v = stack.pop();
+
+            if (!visited[v]) {
+                order.add(v);
+                visited[v] = true;
+
+                for (int u: graph[v]) {
+                    if (!visited[u]) {
+                        stack.push(u);
+                    }
+                }
+            }
+        }
+
+        return order;
     }
 
     public static List<Integer> bfs(int[][] graph, int n, int startVertex) {
