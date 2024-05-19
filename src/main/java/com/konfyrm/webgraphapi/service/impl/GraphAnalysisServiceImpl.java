@@ -16,34 +16,40 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
 
     @Override
     public GraphDistancesResponse calculateDistances(UrlGraph urlGraph) {
-        int[][] distances = FloydWarshallAlgorithm.execute(urlGraph);
-        int[] eccentricity = new int[urlGraph.getN()];
-        for (int i = 0; i < urlGraph.getN(); i++) {
-            int maxDistance = 0;
-            for (int j = 0; j < urlGraph.getN(); j++) {
+//        int[][] distances = FloydWarshallAlgorithm.execute(urlGraph);
+        int n = urlGraph.getN();
+        int[][] graph = GraphConverter.digraphToAdjacencyMatrixGraph(urlGraph.getNeighbours(), n);
+        int[][] distances = FloydWarshallAlgorithm.execute(graph, n);
+        int[] eccentricity = new int[n];
+        for (int i = 0; i < n; i++) {
+            int maxDistance = Integer.MIN_VALUE;
+            for (int j = 0; j < n; j++) {
                 if (distances[i][j] != Integer.MAX_VALUE && i != j && maxDistance < distances[i][j]) {
                     maxDistance = distances[i][j];
                 }
+//                if (distances[j][i] != Integer.MAX_VALUE && i != j && maxDistance < distances[j][i]) {
+//                    maxDistance = distances[j][i];
+//                }
             }
             eccentricity[i] = maxDistance;
         }
 
         int diameter = 0;
-        for (int i = 0; i < urlGraph.getN(); i++) {
-            if (diameter < eccentricity[i]) {
+        for (int i = 0; i < n; i++) {
+            if (eccentricity[i] != Integer.MIN_VALUE && diameter < eccentricity[i]) {
                 diameter = eccentricity[i];
             }
         }
-        int radius = 0;
-        for (int i = 0; i < urlGraph.getN(); i++) {
-            if (radius > eccentricity[i]) {
+        int radius = Integer.MAX_VALUE;
+        for (int i = 0; i < n; i++) {
+            if (eccentricity[i] != Integer.MIN_VALUE && radius > eccentricity[i]) {
                 radius = eccentricity[i];
             }
         }
         double avgDistance = 0.0;
         int distancesCount = 0;
-        for (int u = 0; u < urlGraph.getN(); u++) {
-            for (int v = 0; v < urlGraph.getN(); v++) {
+        for (int u = 0; u < n; u++) {
+            for (int v = 0; v < n; v++) {
                 if (u != v && distances[u][v] != Integer.MAX_VALUE) {
                     avgDistance += distances[u][v];
                     distancesCount++;
@@ -113,12 +119,23 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
     public ClusteringCoefficientsResponse calculateClusteringCoefficients(UrlGraph urlGraph) {
         int n = urlGraph.getN();
         int[][] graph = GraphConverter.digraphToAdjacencyMatrixGraph(urlGraph.getNeighbours(), n);
-        double globalCoefficient = ClusteringCoefficientCalculator.computeGlobal(graph, n);
+//        double globalCoefficient = ClusteringCoefficientCalculator.computeGlobal(graph, n);
         double[] localCoefficients = new double[n];
+        int globalTriangles = 0;
+        int globalTriplets = 0;
 
         for (int v = 0; v < n; v++) {
-            localCoefficients[v] = ClusteringCoefficientCalculator.computeLocal(graph, n, v);
+            Pair<Integer, Integer> coefficientPair = ClusteringCoefficientCalculator.computeTrianglesAndTriplets(graph, n, v);
+//            Pair<Integer, Integer> coefficientPair = ClusteringCoefficientCalculator.computeTrianglesAndTriplets(urlGraph.getNeighbours(), n, v);
+            if (coefficientPair != null) {
+                localCoefficients[v] = (double) coefficientPair.getFirst() / (double) coefficientPair.getSecond();
+                globalTriangles += coefficientPair.getFirst();
+                globalTriplets += coefficientPair.getSecond();
+            } else {
+                localCoefficients[v] = 0.0;
+            }
         }
+        double globalCoefficient = (double) globalTriangles / (double) globalTriplets;
 
         return ClusteringCoefficientsResponse.builder()
                 .global(globalCoefficient)

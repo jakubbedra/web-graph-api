@@ -37,4 +37,34 @@ public class FloydWarshallAlgorithm {
         return shortestPaths;
     }
 
+    public static int[][] execute(int[][] graph, int n) {
+        int[][] shortestPaths = new int[n][n];
+        for (int i = 0; i < shortestPaths.length; i++) {
+            for (int j = 0; j < shortestPaths.length; j++) {
+                shortestPaths[i][j] = Integer.MAX_VALUE;
+            }
+        }
+        for (int v = 0; v < n; v++) {
+            for (int u = v + 1; u < n; u++) {
+                if (graph[v][u] == 1) {
+                    shortestPaths[v][u] = shortestPaths[u][v] = 1;
+                }
+            }
+        }
+        for (int i = 0; i < n; i++) {
+            shortestPaths[i][i] = 0;
+        }
+        for (int k = 0; k < n; k++) {
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (shortestPaths[i][k] != Integer.MAX_VALUE && shortestPaths[k][j] != Integer.MAX_VALUE &&
+                            shortestPaths[i][j] > shortestPaths[i][k] + shortestPaths[k][j]) {
+                        shortestPaths[i][j] = shortestPaths[i][k] + shortestPaths[k][j];
+                    }
+                }
+            }
+        }
+        return shortestPaths;
+    }
+
 }

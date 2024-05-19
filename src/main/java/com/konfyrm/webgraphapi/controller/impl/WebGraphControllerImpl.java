@@ -5,6 +5,7 @@ import com.konfyrm.webgraphapi.domain.entity.Execution;
 import com.konfyrm.webgraphapi.domain.model.UrlGraph;
 import com.konfyrm.webgraphapi.domain.request.PageRankRequest;
 import com.konfyrm.webgraphapi.domain.response.*;
+import com.konfyrm.webgraphapi.maanger.JsonFileManager;
 import com.konfyrm.webgraphapi.service.ExecutionService;
 import com.konfyrm.webgraphapi.service.GraphAnalysisService;
 import com.konfyrm.webgraphapi.service.WebGraphService;
@@ -21,16 +22,19 @@ public class WebGraphControllerImpl implements WebGraphController {
     private final ExecutionService executionService;
     private final WebGraphService webGraphService;
     private final GraphAnalysisService graphAnalysisService;
+    private final JsonFileManager jsonFileManager;
 
     @Autowired
     public WebGraphControllerImpl(
             @Qualifier("executionServiceImpl") ExecutionService executionService,
             @Qualifier("webGraphServiceImpl") WebGraphService webGraphService,
-            @Qualifier("graphAnalysisServiceImpl") GraphAnalysisService graphAnalysisService
-    ) {
+            @Qualifier("graphAnalysisServiceImpl") GraphAnalysisService graphAnalysisService,
+            @Qualifier("jsonFileManagerImpl") JsonFileManager jsonFileManager
+            ) {
         this.executionService = executionService;
         this.webGraphService = webGraphService;
         this.graphAnalysisService = graphAnalysisService;
+        this.jsonFileManager = jsonFileManager;
     }
 
     @Override
@@ -57,9 +61,11 @@ public class WebGraphControllerImpl implements WebGraphController {
         // todo: check if execution finished
         UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
         GraphDistancesResponse graphDistancesResponse = graphAnalysisService.calculateDistances(graph);
+        jsonFileManager.exportObject(graphDistancesResponse, executionUuid);
         return ResponseEntity.ok(graphDistancesResponse);
     }
 
+    //todo: POST endpoints should only export to file?
     @Override
     public ResponseEntity<?> findConnectedComponents(String executionUuid) {
 //        Optional<Execution> executionOptional = executionService.findByUuid(executionUuid);
@@ -104,6 +110,7 @@ public class WebGraphControllerImpl implements WebGraphController {
     public ResponseEntity<?> calculatePageRank(String executionUuid, PageRankRequest request) {
         UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
         PageRankResponse response = graphAnalysisService.calculatePageRank(graph, request.getDampingFactor());
+        jsonFileManager.exportObject(response, executionUuid);
         return ResponseEntity.ok(response);
     }
 
