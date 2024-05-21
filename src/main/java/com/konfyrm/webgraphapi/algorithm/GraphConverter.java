@@ -17,7 +17,8 @@ public class GraphConverter {
         }
         for (int v = 0; v < n; v++) {
             for (Integer u : digraph[v]) {
-                graph[v][u] = graph[u][v] = 1;
+                if (u < n)
+                    graph[v][u] = graph[u][v] = 1;
             }
         }
 

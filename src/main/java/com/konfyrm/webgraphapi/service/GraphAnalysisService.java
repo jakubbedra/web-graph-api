@@ -5,9 +5,10 @@ import com.konfyrm.webgraphapi.domain.response.*;
 
 public interface GraphAnalysisService {
     GraphDistancesResponse calculateDistances(UrlGraph urlGraph);
-    ConnectedComponentsResponse calculateConnectedComponents(UrlGraph urlGraph);
+    ConnectedComponentsResponse findConnectedComponents(UrlGraph urlGraph);
     DisconnectingVerticesResponse findDisconnectingVertices(UrlGraph urlGraph);
     VertexDegreeDistributionResponse calculateVertexDegreeDistribution(UrlGraph urlGraph);
     ClusteringCoefficientsResponse calculateClusteringCoefficients(UrlGraph urlGraph);
     PageRankResponse calculatePageRank(UrlGraph urlGraph, double dampingFactor);
+    PageRankResponse calculatePageRank(UrlGraph urlGraph);
 }

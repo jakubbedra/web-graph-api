@@ -84,6 +84,199 @@ public class WebGraphServiceImpl implements WebGraphService {
     }
 
     @Override
+    public UrlGraph getWithDeletedMaxDegreeVertices(String executionUuid, int amount, boolean outDegree) {
+        UrlGraph graph = getOrCreateGraph(executionUuid);
+        int n = graph.getN();
+        List<Integer>[] neighbours = new List[n];
+        for (int v = 0; v < n; v++) {
+            neighbours[v] = new LinkedList<>();
+            neighbours[v].addAll(graph.getNeighbours()[v]);
+        }
+
+        Map<String, Integer> urlsToIndices = new HashMap<>(graph.getUrlsToIndices());
+        List<Integer> maxDegreeVertices = new ArrayList<>(amount);
+        List<Integer> vertices = new ArrayList<>(n);
+        for (int v = 0; v < n; v++) {
+            vertices.add(v);
+        }
+
+        Integer[] inDegrees = outDegree ? null : getVertexInDegrees(neighbours, n);
+        Comparator<Integer> comparator = outDegree ?
+                Comparator.comparingInt(v -> neighbours[v].size()) :
+                Comparator.comparingInt(v -> inDegrees[v]);
+
+        vertices = vertices.stream()
+                .sorted(comparator.reversed())
+                .limit(amount)
+                .collect(Collectors.toList());
+
+        for (int i = 0; i < amount; i++) {
+            Integer maxDegreeVertex = vertices.getFirst();
+//                    stream()
+//                    .filter(v -> !maxDegreeVertices.contains(v))
+//                    .max(comparator)
+//                    .orElseThrow(() -> new IllegalStateException("Graph for execution: " + executionUuid + " does not contain enough vertices!"));
+            maxDegreeVertices.add(maxDegreeVertex);
+
+            for (int v = 0; v < n; v++) {
+                neighbours[v] = neighbours[v].stream()
+                        .filter(w -> !Objects.equals(w, maxDegreeVertex))
+                        .map(w -> (w > maxDegreeVertex ? w-1 : w))
+                        .toList();
+            }
+
+
+            String maxDegreeVertexKey = urlsToIndices.entrySet().stream()
+                    .filter(entry -> entry.getValue().equals(maxDegreeVertex))
+                    .map(Map.Entry::getKey)
+                    .findFirst()
+                    .orElseThrow();
+            urlsToIndices.remove(maxDegreeVertexKey);
+            for (int v = maxDegreeVertex + 1; v < n; v++) {
+                Integer finalV = v;
+                String key = urlsToIndices.entrySet().stream()
+                        .filter(entry -> entry.getValue().equals(finalV))
+                        .map(Map.Entry::getKey)
+                        .findFirst()
+                        .orElseThrow();
+                urlsToIndices.remove(key);
+                urlsToIndices.put(key, v-1);
+            }
+            vertices = vertices.stream()
+                    .filter(w -> w != maxDegreeVertex)
+                    .map(w -> (w > maxDegreeVertex ? w-1 : w))
+                    .toList();
+
+
+            for (int v = maxDegreeVertex; v < n-1; v++) {
+                neighbours[v] = neighbours[v+1];
+            }
+            neighbours[n-1] = null;
+            n--;
+        }
+
+        // todo: nie zmniejszam indeksow w tej liscie max -_-
+
+        int m = 0;
+        for (int i = 0; i < n; i++) {
+            m += neighbours[i].size();
+        }
+        return UrlGraph.builder()
+                .n(n)
+                .m(m)
+                .neighbours(neighbours)
+                .urlsToIndices(urlsToIndices)
+                .build();
+    }
+
+    private Integer[] getVertexInDegrees(List<Integer>[] digraph, int n) {
+        Integer[] vertexDegrees = new Integer[n];
+        Arrays.fill(vertexDegrees, 0);
+        for (int v = 0; v < n; v++) {
+            for (Integer u : digraph[v]) {
+                try {
+                    vertexDegrees[u]++;
+                } catch (Exception ex) {
+                    System.out.println("dupa");
+                }
+            }
+        }
+        return vertexDegrees;
+    }
+
+    private int inVerticesCount(Integer v, List<Integer>[] neighbours, int n) {
+        int inDegree = 0;
+        for (int u = 0; u < n; u++) {
+            if (u != v && neighbours[u].contains(v)) {
+                inDegree++;
+            }
+        }
+        return inDegree;
+    }
+
+    @Override
+    public UrlGraph getWithDeletedRandomVertices(String executionUuid, int amount) {
+        UrlGraph graph = getOrCreateGraph(executionUuid);
+        int n = graph.getN();
+        List<Integer>[] neighbours = new List[n];
+        for (int v = 0; v < n; v++) {
+            neighbours[v] = new LinkedList<>();
+            neighbours[v].addAll(graph.getNeighbours()[v]);
+        }
+
+        Map<String, Integer> urlsToIndices = new HashMap<>(graph.getUrlsToIndices());
+        List<Integer> maxDegreeVertices = new ArrayList<>(amount);
+        List<Integer> vertices = new ArrayList<>(n);
+        for (int v = 0; v < n; v++) {
+            vertices.add(v);
+        }
+
+        final Random r = new Random();
+        Comparator<Integer> comparator = Comparator.comparingInt(x -> r.nextInt()); // todo: exctract method so that only comparator is passed
+
+        vertices = vertices.stream()
+                .sorted(comparator.reversed())
+                .limit(amount)
+                .collect(Collectors.toList());
+
+        for (int i = 0; i < amount; i++) {
+            Integer maxDegreeVertex = vertices.getFirst();
+//                    stream()
+//                    .filter(v -> !maxDegreeVertices.contains(v))
+//                    .max(comparator)
+//                    .orElseThrow(() -> new IllegalStateException("Graph for execution: " + executionUuid + " does not contain enough vertices!"));
+            maxDegreeVertices.add(maxDegreeVertex);
+
+            for (int v = 0; v < n; v++) {
+                neighbours[v] = neighbours[v].stream()
+                        .filter(w -> !Objects.equals(w, maxDegreeVertex))
+                        .map(w -> (w > maxDegreeVertex ? w-1 : w))
+                        .toList();
+            }
+
+
+            String maxDegreeVertexKey = urlsToIndices.entrySet().stream()
+                    .filter(entry -> entry.getValue().equals(maxDegreeVertex))
+                    .map(Map.Entry::getKey)
+                    .findFirst()
+                    .orElseThrow();
+            urlsToIndices.remove(maxDegreeVertexKey);
+            for (int v = maxDegreeVertex + 1; v < n; v++) {
+                Integer finalV = v;
+                String key = urlsToIndices.entrySet().stream()
+                        .filter(entry -> entry.getValue().equals(finalV))
+                        .map(Map.Entry::getKey)
+                        .findFirst()
+                        .orElseThrow();
+                urlsToIndices.remove(key);
+                urlsToIndices.put(key, v-1);
+            }
+            vertices = vertices.stream()
+                    .filter(w -> w != maxDegreeVertex)
+                    .map(w -> (w > maxDegreeVertex ? w-1 : w))
+                    .toList();
+
+
+            for (int v = maxDegreeVertex; v < n-1; v++) {
+                neighbours[v] = neighbours[v+1];
+            }
+            neighbours[n-1] = null;
+            n--;
+        }
+
+        int m = 0;
+        for (int i = 0; i < n; i++) {
+            m += neighbours[i].size();
+        }
+        return UrlGraph.builder()
+                .n(n)
+                .m(m)
+                .neighbours(neighbours)
+                .urlsToIndices(urlsToIndices)
+                .build();
+    }
+
+    @Override
     public void exportJson(String executionId) {
         UrlGraph graph = getOrCreateGraph(executionId);
         ObjectMapper mapper = new ObjectMapper();

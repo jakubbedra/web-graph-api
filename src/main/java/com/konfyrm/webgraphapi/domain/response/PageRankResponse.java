@@ -13,5 +13,7 @@ import java.util.Map;
 public class PageRankResponse {
     private Double[] pageRank;
     private Map<Double, Integer> distribution;
+    private double a;
+    private double b;
+    private int iterationsCount;
 }
-

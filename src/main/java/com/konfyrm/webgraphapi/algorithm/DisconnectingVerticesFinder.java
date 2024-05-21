@@ -3,6 +3,7 @@ package com.konfyrm.webgraphapi.algorithm;
 import org.springframework.data.util.Pair;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -15,6 +16,7 @@ public class DisconnectingVerticesFinder {
     // we assume that we only pass non-directed graphs!!!
     public static List<Integer> findDisconnectingVertices(List<Integer>[] graph, int n) {
         boolean[] visited = new boolean[n];
+        Arrays.fill(visited,false);
         List<Integer> disconnectingVertices = new LinkedList<>();
         for (int v = 0; v < n; v++) {
             Arrays.fill(visited,false);

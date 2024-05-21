@@ -30,7 +30,7 @@ public class WebGraphControllerImpl implements WebGraphController {
             @Qualifier("webGraphServiceImpl") WebGraphService webGraphService,
             @Qualifier("graphAnalysisServiceImpl") GraphAnalysisService graphAnalysisService,
             @Qualifier("jsonFileManagerImpl") JsonFileManager jsonFileManager
-            ) {
+    ) {
         this.executionService = executionService;
         this.webGraphService = webGraphService;
         this.graphAnalysisService = graphAnalysisService;
@@ -73,7 +73,8 @@ public class WebGraphControllerImpl implements WebGraphController {
 //            return ResponseEntity.notFound().build();
 //        }
         UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
-        ConnectedComponentsResponse response = graphAnalysisService.calculateConnectedComponents(graph);
+        ConnectedComponentsResponse response = graphAnalysisService.findConnectedComponents(graph);
+        jsonFileManager.exportObject(response, executionUuid);
         return ResponseEntity.ok(response);
     }
 
@@ -85,6 +86,7 @@ public class WebGraphControllerImpl implements WebGraphController {
 //        }
         UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
         DisconnectingVerticesResponse response = graphAnalysisService.findDisconnectingVertices(graph);
+        jsonFileManager.exportObject(response, executionUuid);
         return ResponseEntity.ok(response);
     }
 
@@ -96,6 +98,7 @@ public class WebGraphControllerImpl implements WebGraphController {
 //        }
         UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
         VertexDegreeDistributionResponse response = graphAnalysisService.calculateVertexDegreeDistribution(graph);
+        jsonFileManager.exportObject(response, executionUuid);
         return ResponseEntity.ok(response);
     }
 
@@ -103,14 +106,17 @@ public class WebGraphControllerImpl implements WebGraphController {
     public ResponseEntity<?> calculateClusteringCoefficients(String executionUuid) {
         UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
         ClusteringCoefficientsResponse response = graphAnalysisService.calculateClusteringCoefficients(graph);
+        jsonFileManager.exportObject(response, executionUuid);
         return ResponseEntity.ok(response);
     }
 
     @Override
     public ResponseEntity<?> calculatePageRank(String executionUuid, PageRankRequest request) {
         UrlGraph graph = webGraphService.getOrCreateGraph(executionUuid);
-        PageRankResponse response = graphAnalysisService.calculatePageRank(graph, request.getDampingFactor());
-        jsonFileManager.exportObject(response, executionUuid);
+        PageRankResponse response = request.isWithDamping() ?
+                graphAnalysisService.calculatePageRank(graph, request.getDampingFactor()) :
+                graphAnalysisService.calculatePageRank(graph);
+        jsonFileManager.exportObject(response, "[" + (request.isWithDamping() ? request.getDampingFactor() : "-") + "]" + executionUuid);
         return ResponseEntity.ok(response);
     }
 

@@ -10,4 +10,5 @@ import lombok.*;
 @EqualsAndHashCode
 public class SimulateAttackRequest {
     private int topDegreeVerticesCount;
+    private String type;
 }

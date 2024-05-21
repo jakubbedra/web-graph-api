@@ -9,5 +9,6 @@ import lombok.*;
 @NoArgsConstructor
 @EqualsAndHashCode
 public class PageRankRequest {
+    private boolean withDamping;
     private double dampingFactor;
 }

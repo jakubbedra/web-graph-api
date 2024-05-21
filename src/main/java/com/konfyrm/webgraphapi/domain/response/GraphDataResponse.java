@@ -2,6 +2,8 @@ package com.konfyrm.webgraphapi.domain.response;
 
 import lombok.*;
 
+import java.util.Map;
+
 @Getter
 @Setter
 @Builder
@@ -13,4 +15,6 @@ public class GraphDataResponse {
     private VertexDegreeDistributionResponse degreeDistribution;
     private GraphDistancesResponse distances;
     private DisconnectingVerticesResponse disconnectingVertices;
+    private Map<String, Integer> removedVertices;
+    private int m;
 }

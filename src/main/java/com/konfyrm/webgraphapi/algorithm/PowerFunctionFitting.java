@@ -36,6 +36,28 @@ public class PowerFunctionFitting {
         return Pair.of(a, b);
     }
 
+    public static Pair<Double, Double> fitPowerFunctionDouble(Map<Double, Integer> samples) {
+        List<Double> logXValues = samples.keySet().stream()
+                .mapToDouble(x -> x == 0 ? 0.00001 : x)
+                .map(Math::log)
+                .boxed()
+                .collect(Collectors.toList());
+        List<Double> logYValues = samples.values().stream()
+                .mapToDouble(x -> (double)x)
+                .map(Math::log)
+                .boxed()
+                .collect(Collectors.toList());
+
+        double avgLogX = logXValues.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+        double avgLogY = logYValues.stream().mapToDouble(Double::doubleValue).average().orElse(0);
+
+        // Calculate coefficients
+        double b = calculateB(logXValues, logYValues, avgLogX, avgLogY);
+        double a = calculateA(avgLogX, avgLogY, b);
+
+        return Pair.of(a, b);
+    }
+
     private static double calculateB(List<Double> logXValues, List<Double> logYValues, double meanLogX, double meanLogY) {
         double numerator = 0;
         double denominator = 0;

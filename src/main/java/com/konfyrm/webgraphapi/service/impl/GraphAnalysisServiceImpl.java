@@ -7,9 +7,7 @@ import com.konfyrm.webgraphapi.service.GraphAnalysisService;
 import org.springframework.data.util.Pair;
 import org.springframework.stereotype.Service;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class GraphAnalysisServiceImpl implements GraphAnalysisService {
@@ -66,7 +64,7 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
     }
 
     @Override
-    public ConnectedComponentsResponse calculateConnectedComponents(UrlGraph urlGraph) {
+    public ConnectedComponentsResponse findConnectedComponents(UrlGraph urlGraph) {
         List<List<Integer>> wcccs = WCCFinder.execute(urlGraph);
         List<List<Integer>> sccs = SCCFinder.execute(urlGraph);
         Map<Integer, List<Integer>> inComponents = InAndOutComponentFinder.findInComponents(urlGraph.getNeighbours(), urlGraph.getN(), sccs);
@@ -83,12 +81,25 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
 
     @Override
     public DisconnectingVerticesResponse findDisconnectingVertices(UrlGraph urlGraph) {
-        List<Integer>[] graph = GraphConverter.digraphToGraph(urlGraph.getNeighbours(), urlGraph.getN());
+        int n = urlGraph.getN();
+        List<Integer>[] graph = GraphConverter.digraphToGraph(urlGraph.getNeighbours(), n);
+        boolean[] visited = new boolean[n];
+        Arrays.fill(visited,false);
+        List<Integer> bfs = SearchAlgorithms.bfs(graph, 0, visited);
+        // disconnected graph
+        if (bfs.size() != n) {
+            return DisconnectingVerticesResponse.builder()
+                    .disconnectingVerticesCount(0)
+                    .disconnectingVerticesPairsCount(0)
+                    .disconnectingVertices(Collections.emptyList())
+                    .disconnectingVerticesPairs(Collections.emptyList())
+                    .build();
+        }
         List<Integer> disconnectingVertices = DisconnectingVerticesFinder
-                .findDisconnectingVertices(graph, urlGraph.getN());
+                .findDisconnectingVertices(graph, n);
         List<Pair<Integer, Integer>> disconnectingVerticesPairs = !disconnectingVertices.isEmpty() ?
                 Collections.emptyList() : DisconnectingVerticesFinder
-                .findDisconnectingVerticesPairs(graph, urlGraph.getN());
+                .findDisconnectingVerticesPairs(graph, n);
         return DisconnectingVerticesResponse.builder()
                 .disconnectingVerticesCount(disconnectingVertices.size())
                 .disconnectingVerticesPairsCount(disconnectingVerticesPairs.size())
@@ -119,14 +130,12 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
     public ClusteringCoefficientsResponse calculateClusteringCoefficients(UrlGraph urlGraph) {
         int n = urlGraph.getN();
         int[][] graph = GraphConverter.digraphToAdjacencyMatrixGraph(urlGraph.getNeighbours(), n);
-//        double globalCoefficient = ClusteringCoefficientCalculator.computeGlobal(graph, n);
         double[] localCoefficients = new double[n];
-        int globalTriangles = 0;
-        int globalTriplets = 0;
+        long globalTriangles = 0;
+        long globalTriplets = 0;
 
         for (int v = 0; v < n; v++) {
             Pair<Integer, Integer> coefficientPair = ClusteringCoefficientCalculator.computeTrianglesAndTriplets(graph, n, v);
-//            Pair<Integer, Integer> coefficientPair = ClusteringCoefficientCalculator.computeTrianglesAndTriplets(urlGraph.getNeighbours(), n, v);
             if (coefficientPair != null) {
                 localCoefficients[v] = (double) coefficientPair.getFirst() / (double) coefficientPair.getSecond();
                 globalTriangles += coefficientPair.getFirst();
@@ -135,8 +144,9 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
                 localCoefficients[v] = 0.0;
             }
         }
-        double globalCoefficient = (double) globalTriangles / (double) globalTriplets;
 
+        globalTriplets /= 2;
+        double globalCoefficient = (double) globalTriangles / (double) globalTriplets;
         return ClusteringCoefficientsResponse.builder()
                 .global(globalCoefficient)
                 .local(localCoefficients)
@@ -146,11 +156,27 @@ public class GraphAnalysisServiceImpl implements GraphAnalysisService {
     @Override
     public PageRankResponse calculatePageRank(UrlGraph urlGraph, double dampingFactor) {
         int n = urlGraph.getN();
-        Double[] pageRank = PageRank.execute(urlGraph.getNeighbours(), n, dampingFactor);
-        Map<Double, Integer> distribution = AlgorithmUtils.valuesToDistribution(pageRank, n);
+        Pair<Double[], Integer> pageRank = PageRank.execute(urlGraph.getNeighbours(), n, dampingFactor);
+        return buildPageRankResponse(n, pageRank);
+    }
+
+    @Override
+    public PageRankResponse calculatePageRank(UrlGraph urlGraph) {
+        int n = urlGraph.getN();
+        Pair<Double[], Integer> pageRank = PageRank.execute(urlGraph.getNeighbours(), n);
+        return buildPageRankResponse(n, pageRank);
+    }
+
+    private PageRankResponse buildPageRankResponse(int n, Pair<Double[], Integer> pageRank) {
+        Map<Double, Integer> distribution = AlgorithmUtils.valuesToDistribution(pageRank.getFirst(), n);
+        Pair<Double, Double> coefficients = PowerFunctionFitting.fitPowerFunctionDouble(distribution);
+
         return PageRankResponse.builder()
-                .pageRank(pageRank)
+                .pageRank(pageRank.getFirst())
+                .iterationsCount(pageRank.getSecond())
                 .distribution(distribution)
+                .a(coefficients.getFirst())
+                .b(coefficients.getSecond())
                 .build();
     }
 

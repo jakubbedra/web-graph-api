@@ -10,4 +10,5 @@ import lombok.*;
 @EqualsAndHashCode
 public class SimulateMalfunctionRequest {
     private int randomVerticesCount;
+    private int repetitions;
 }

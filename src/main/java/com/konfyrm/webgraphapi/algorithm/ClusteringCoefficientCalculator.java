@@ -2,30 +2,10 @@ package com.konfyrm.webgraphapi.algorithm;
 
 import org.springframework.data.util.Pair;
 
-import java.util.List;
-import java.util.Objects;
-
 public class ClusteringCoefficientCalculator {
 
     private ClusteringCoefficientCalculator() {
         throw new IllegalStateException("Utils class should not be instantiated.");
-    }
-
-    public static Pair<Integer, Integer> computeTrianglesAndTriplets(List<Integer>[] graph, int n, int v) {
-        int degree = graph[v].size();
-        if (degree == 1) {
-            return null;
-        }
-
-        int connectedNeighbours = 0;
-        for (Integer u : graph[v]) {
-            for (Integer w : graph[v]) {
-                if (!Objects.equals(u, w) && graph[u].contains(w)) {
-                    connectedNeighbours++;
-                }
-            }
-        }
-        return Pair.of(connectedNeighbours, (degree * (degree - 1)));
     }
 
     public static Pair<Integer, Integer> computeTrianglesAndTriplets(int[][] graph, int n, int v) {
@@ -46,7 +26,7 @@ public class ClusteringCoefficientCalculator {
                 }
             }
         }
-        return Pair.of(connectedNeighbours, (degree * (degree - 1)));// todo: number of tringles is sometimes larger than the number of triplets. what the fuck?
+        return Pair.of(connectedNeighbours, (degree * (degree - 1)));
     }
 
     public static double computeGlobal(int[][] graph, int n) {
@@ -81,7 +61,7 @@ public class ClusteringCoefficientCalculator {
         if (tripletCount == 0) {
             return 0.0;
         }
-        return (double) tripleTriangleCount / tripletCount;
+        return (double) tripleTriangleCount / (double) tripletCount;
     }
 
 }
