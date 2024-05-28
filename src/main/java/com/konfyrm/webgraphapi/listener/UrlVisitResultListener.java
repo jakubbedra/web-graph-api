@@ -1,5 +1,6 @@
 package com.konfyrm.webgraphapi.listener;
 
+import com.konfyrm.webgraphapi.domain.entity.Execution;
 import com.konfyrm.webgraphapi.domain.message.UrlNode;
 import com.konfyrm.webgraphapi.domain.message.UrlVisitResult;
 import com.konfyrm.webgraphapi.service.ExecutionService;
@@ -62,9 +63,11 @@ public class UrlVisitResultListener {
 
         webGraphService.updateUrlMap(result.getExecutionUuid(), result.getNodes());
         executionService.update(result.getExecutionUuid(), doneTasks.size(), todoTasks.size());
+        Optional<Execution> executionOptional = executionService.findByUuid(result.getExecutionUuid());
+        boolean downloadFiles = executionOptional.map(Execution::isDownloadFiles).orElse(true);
 // todo: update tasksInProgress and lastUpdateTimestamp?
         urlsInQueue.addAll(todoTasks);
-        todoTasks.forEach(url -> urlVisitService.sendUrlVisitRequest(result.getExecutionUuid(), url));
+        todoTasks.forEach(url -> urlVisitService.sendUrlVisitRequest(result.getExecutionUuid(), url, downloadFiles));
     }
 
 }

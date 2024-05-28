@@ -23,10 +23,11 @@ public class UrlVisitServiceImpl implements UrlVisitService {
     }
 
     @Override
-    public void sendUrlVisitRequest(String executionUuid, String startingUrl) {
+    public void sendUrlVisitRequest(String executionUuid, String startingUrl, boolean downloadFiles) {
         UrlVisitRequest request = UrlVisitRequest.builder()
                 .executionUuid(executionUuid)
                 .url(startingUrl)
+                .downloadFiles(downloadFiles)
                 .build();
         kafkaTemplate.send(REQUEST_TOPIC, request);
     }

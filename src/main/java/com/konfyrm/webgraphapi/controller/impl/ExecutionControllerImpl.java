@@ -48,9 +48,10 @@ public class ExecutionControllerImpl implements ExecutionController {
     public ResponseEntity<?> sendUrlVisitRequest(ExecutionRequest request) {
         Execution execution = Execution.builder()
                 .tasksInProgress(1)
+                .downloadFiles(request.isDownloadFiles())
                 .build();
         String executionUuid = executionService.save(execution);
-        urlVisitService.sendUrlVisitRequest(executionUuid, request.getUrl());
+        urlVisitService.sendUrlVisitRequest(executionUuid, request.getUrl(), request.isDownloadFiles());
         return ResponseEntity.ok(executionUuid);
     }
 

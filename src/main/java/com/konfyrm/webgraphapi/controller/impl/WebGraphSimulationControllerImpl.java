@@ -97,7 +97,7 @@ public class WebGraphSimulationControllerImpl implements WebGraphSimulationContr
                 .m(urlGraph.getM())
                 .build();
 
-        jsonFileManager.exportObject(response, "malfunctions/[" + verticesToDelete + "-" + (i+4) + "]" + executionUuid);
+        jsonFileManager.exportObject(response, "malfunctions/[" + verticesToDelete + "-" + (i) + "]" + executionUuid);
     }
 
 }

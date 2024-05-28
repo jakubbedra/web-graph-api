@@ -17,5 +17,5 @@ public class Execution {
     private int tasksInProgress;
     private long triggeredTimestamp;
     private long lastUpdateTimestamp;
+    private boolean downloadFiles;
 }
-

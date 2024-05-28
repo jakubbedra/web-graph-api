@@ -10,4 +10,5 @@ import lombok.*;
 @EqualsAndHashCode
 public class ExecutionRequest {
     private String url;
+    private boolean downloadFiles;
 }
